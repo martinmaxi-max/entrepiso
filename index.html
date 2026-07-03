@@ -115,12 +115,13 @@
 <div id="modal-root"></div>
 <div id="modal-root2"></div>
 <script>
-const LOGO = "data:image/png;base64,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";
+const LOGO = "data:image/png;base64,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";
 // ════════════════════════════════════════════════════════════════════════
-// ENTREPISO SAS — Motor v2
+// ENTREPISO SAS — Motor v2.1
 // Modelo: Ingresos y Gastos como planillas madre. Cada movimiento marca
 // si toca CAJA (conciliada) o BANCO (saldo manual). E-cheques con proyección
-// por día. Socios con 3 subcuentas (aportes − retiros).
+// por día. Socios con 3 subcuentas (aportes − retiros). Cuentas de egreso
+// administrables (Bienes de Uso con ficha propia). Resumen por centro de costo.
 // Capa DB abstraída para migrar a Firebase reescribiendo solo DB.* y Session.*
 // ════════════════════════════════════════════════════════════════════════
 
@@ -140,8 +141,13 @@ function buscarEnLista(lista, nombre) { return lista.find(x => nombreDe(x) === n
 
 // Tipos de INGRESO  → destino: caja | banco
 const TIPOS_INGRESO = ["Cobranzas", "Aportes Socios", "Otros Ingresos"];
-// Tipos de GASTO/EGRESO
-const TIPOS_GASTO = ["Proveedores", "Sueldos", "Impuestos", "Retiros", "Gastos varios", "Otros"];
+// Cuentas de EGRESO: administrables, viven en DB (podés crear nuevas al vuelo)
+const TIPOS_GASTO_BASE = ["Proveedores", "Sueldos", "Mano de Obra", "Honorarios", "Cargas Sociales", "Gastos Bancarios", "Impuestos", "Bienes de Uso", "Retiros", "Gastos varios", "Otros"];
+function tiposGasto() {
+  const d = DB.get();
+  if (!d.tiposGasto || !d.tiposGasto.length) { d.tiposGasto = [...TIPOS_GASTO_BASE]; DB.save(); }
+  return d.tiposGasto;
+}
 // Formas de pago de un gasto → impacto
 const FORMAS_PAGO = [
   { id: "efectivo",      label: "Caja (efectivo)" },
@@ -161,7 +167,7 @@ const DB = {
   _docRef: null,
   _default() {
     return {
-      centrosCosto: ["General"], proveedores: [], clientes: [],
+      centrosCosto: ["General"], proveedores: [], clientes: [], tiposGasto: [...TIPOS_GASTO_BASE],
       ingresos: [], gastos: [], cheques: [], ajustesCaja: [],
       saldoInicialCaja: 0, saldoBancoManual: 0, saldoBancoFecha: "",
     };
@@ -249,6 +255,11 @@ function montoPorForma(g, forma) {
   if (g.forma === forma && g.estado === "pagado") return g.importe;
   return 0;
 }
+// cuánto queda pendiente (cta cte) de un gasto — soporta pagos mixtos y modelo viejo
+function pendienteDe(g) {
+  if (g.pagos && g.pagos.length) return g.estado === "pendiente" ? (g.montoPendiente || 0) : 0;
+  return g.estado === "pendiente" ? g.importe : 0;
+}
 // BANCO: saldo 100% manual
 function saldoBanco() { return DB.get().saldoBancoManual || 0; }
 function chequesPendientes() { return DB.get().cheques.filter(c => c.estado === "pendiente"); }
@@ -288,10 +299,7 @@ function socioResumen(nombre) {
   return { aportes, retiros, neto: aportes - retiros, ultimaFecha };
 }
 function deudaProveedores() {
-  return DB.get().gastos.reduce((a, g) => {
-    if (g.pagos && g.pagos.length) return a + (g.estado === "pendiente" ? (g.montoPendiente || 0) : 0);
-    return a + (g.estado === "pendiente" ? g.importe : 0);
-  }, 0);
+  return DB.get().gastos.reduce((a, g) => a + pendienteDe(g), 0);
 }
 // CLIENTES: cuentas por cobrar (cobranzas con parte en cta cte)
 function porCobrarTotal() {
@@ -368,6 +376,8 @@ const TABS = [
   { id: "proveedores",label: "Proveedores", icon: "📦" },
   { id: "clientes",   label: "Clientes",  icon: "🧑‍💼" },
   { id: "socios",     label: "Socios",    icon: "👥" },
+  { id: "ccosto",     label: "C. Costo",  icon: "🏗️" },
+  { id: "bienes",     label: "Bienes de Uso", icon: "🚜" },
 ];
 
 function shell() {
@@ -386,14 +396,14 @@ function go(t) { activeTab = t; document.querySelectorAll(".tab").forEach(el => 
 function renderTabContent() {
   const w = document.getElementById("tabwrap"); if (!w) return;
   if (activeTab === "banco") activeTab = "cheques";
-  const v = { ingresos: viewIngresos, gastos: viewGastos, caja: viewCaja, cheques: viewCheques, proveedores: viewProveedores, clientes: viewClientes, socios: viewSocios }[activeTab];
+  const v = { ingresos: viewIngresos, gastos: viewGastos, caja: viewCaja, cheques: viewCheques, proveedores: viewProveedores, clientes: viewClientes, socios: viewSocios, ccosto: viewCCosto, bienes: viewBienes }[activeTab];
   w.innerHTML = v ? v() : "";
   if (!puedeEditar()) aplicarModoLectura();
 }
 // Oculta controles de edición para usuarios lectores
 function aplicarModoLectura() {
   const wrap = document.getElementById("tabwrap"); if (!wrap) return;
-  const escrituras = ["openIngresoModal", "openGastoModal", "openSaldarModal", "openCobrarModal", "DB.remove", "setSaldoInicialCaja", "setSaldoBanco", "openAjusteCaja", "toggleCheque", "openCentrosModal"];
+  const escrituras = ["openIngresoModal", "openGastoModal", "openSaldarModal", "openCobrarModal", "DB.remove", "setSaldoInicialCaja", "setSaldoBanco", "openAjusteCaja", "toggleCheque", "openCentrosModal", "openBienNuevo"];
   wrap.querySelectorAll("button").forEach(btn => {
     const oc = btn.getAttribute("onclick") || "";
     if (escrituras.some(e => oc.includes(e))) btn.style.display = "none";
@@ -549,7 +559,7 @@ function viewGastos() {
     return formas.map(f => `<span class="badge" style="background:${(formaCol[f] || "var(--muted)")}22;color:${formaCol[f] || "var(--muted)"};margin-right:3px">${formaTxt[f] || f}</span>`).join("");
   };
   return `
-    <div class="toolbar"><div><h2>Egresos</h2><div class="sub">Proveedores, sueldos, retiros e impuestos — elegí cómo se paga</div></div>
+    <div class="toolbar"><div><h2>Egresos</h2><div class="sub">Proveedores, sueldos, honorarios, bienes de uso e impuestos — elegí cómo se paga</div></div>
       <button class="btn" onclick="openGastoModal()">+ Registrar Egreso</button></div>
     <div class="stats">
       <div class="stat"><div class="lbl">Total gastos</div><div class="val" style="color:var(--accent)">${fmt(total)}</div><div class="sub">${gastos.length} registros</div></div>
@@ -557,11 +567,11 @@ function viewGastos() {
     </div>
     <div class="panel" style="overflow:hidden">
       ${gastos.length === 0 ? `<div class="empty">No hay gastos cargados.</div>` :
-      `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Proveedor / Detalle</th><th>C. costo</th><th>Forma</th><th class="num">Importe</th><th>Estado</th><th></th></tr></thead><tbody>
+      `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Cuenta</th><th>Proveedor / Detalle</th><th>C. costo</th><th>Forma</th><th class="num">Importe</th><th>Estado</th><th></th></tr></thead><tbody>
       ${gastos.map(g => `<tr>
         <td style="white-space:nowrap">${fmtF(g.fecha)}</td>
         <td class="muted">${esc(g.tipo)}${g.socio ? `<div style="font-size:11px">${esc(g.socio.split(" ")[0])}</div>` : ""}</td>
-        <td>${esc(g.proveedor || "—")}${g.concepto ? `<div class="muted" style="font-size:11px">${esc(g.concepto)}</div>` : ""}${(g.facturaTipo || g.facturaNro) ? `<div class="muted" style="font-size:11px">Fc ${esc(g.facturaTipo)} ${esc(g.facturaNro)}</div>` : ""}</td>
+        <td>${esc(g.proveedor || "—")}${g.bien ? `<div class="muted" style="font-size:11px">🚜 ${esc(g.bien.descripcion)}</div>` : ""}${g.concepto ? `<div class="muted" style="font-size:11px">${esc(g.concepto)}</div>` : ""}${(g.facturaTipo || g.facturaNro) ? `<div class="muted" style="font-size:11px">Fc ${esc(g.facturaTipo)} ${esc(g.facturaNro)}</div>` : ""}</td>
         <td class="muted">${proyectoLabel(g.proyecto)}</td>
         <td>${formaBadge(g)}</td>
         <td class="num" style="font-weight:600;color:var(--danger)">${fmt(g.importe)}</td>
@@ -576,10 +586,12 @@ function openGastoModal(editId) {
   window._editGastoId = editId || null;
   pagosTemp = e && e.pagos ? e.pagos.map(p => ({ ...p })) : [];
   chequesTemp = [];
+  const tipos = tiposGasto().slice();
+  if (e && e.tipo && !tipos.includes(e.tipo)) tipos.push(e.tipo);
   modalHTML(`
     <div class="grid2">
       <div class="field"><label class="field-lbl">Fecha</label><input id="g_fecha" type="date" value="${e ? e.fecha : today()}"></div>
-      <div class="field"><label class="field-lbl">Tipo</label><select id="g_tipo" onchange="gTipoChange()">${TIPOS_GASTO.map(t => `<option ${e && e.tipo === t ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+      <div class="field"><label class="field-lbl">Cuenta / tipo</label><select id="g_tipo" onchange="gTipoChange()">${tipos.map(t => `<option ${e && e.tipo === t ? "selected" : ""}>${t}</option>`).join("")}<option value="__nueva__">+ Nueva cuenta…</option></select></div>
     </div>
     <div id="g_tipoextra"></div>
     <div class="grid3">
@@ -594,17 +606,46 @@ function openGastoModal(editId) {
     <div id="g_pagos"></div>
   `, editId ? "Editar egreso" : "Registrar egreso", "saveGasto()");
   gTipoChange(); renderPagos();
-  if (e) { if (e.proveedor && document.getElementById("g_prov")) document.getElementById("g_prov").value = e.proveedor; if (e.socio && document.getElementById("g_socio")) document.getElementById("g_socio").value = e.socio; }
+  if (e) {
+    if (e.proveedor && document.getElementById("g_prov")) document.getElementById("g_prov").value = e.proveedor;
+    if (e.socio && document.getElementById("g_socio")) document.getElementById("g_socio").value = e.socio;
+    if (e.bien) {
+      const m = { g_bien_desc: e.bien.descripcion, g_bien_marca: e.bien.marca, g_bien_serie: e.bien.serie };
+      Object.keys(m).forEach(k => { const el = document.getElementById(k); if (el) el.value = m[k] || ""; });
+    }
+  }
 }
 function gTipoChange() {
-  const t = document.getElementById("g_tipo").value;
+  const sel = document.getElementById("g_tipo");
+  // opción "+ Nueva cuenta…": crear una cuenta de egreso en el momento
+  if (sel.value === "__nueva__") {
+    const v = prompt("Nombre de la nueva cuenta de egreso:");
+    if (v && v.trim()) {
+      const nombre = v.trim();
+      const d = DB.get(); if (!d.tiposGasto || !d.tiposGasto.length) d.tiposGasto = [...TIPOS_GASTO_BASE];
+      if (!d.tiposGasto.includes(nombre)) { d.tiposGasto.push(nombre); DB.save(); }
+      const o = document.createElement("option"); o.text = nombre; o.selected = true;
+      sel.add(o, sel.options[sel.options.length - 1]);
+    } else { sel.selectedIndex = 0; }
+  }
+  const t = sel.value;
   const ex = document.getElementById("g_tipoextra");
   if (t === "Proveedores") ex.innerHTML = `<div class="field"><label class="field-lbl">Proveedor</label>${selectConNuevo("g_prov", listaProveedores(), "", "proveedores")}</div>`;
   else if (t === "Retiros") ex.innerHTML = `<div class="field"><label class="field-lbl">¿Qué socio retira?</label><select id="g_socio">${SOCIOS.map(s => `<option>${s}</option>`).join("")}</select></div>`;
+  else if (t === "Bienes de Uso") ex.innerHTML = `
+    <div class="field"><label class="field-lbl">Proveedor</label>${selectConNuevo("g_prov", listaProveedores(), "", "proveedores")}</div>
+    <div style="border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--panel2);margin-bottom:13px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Datos del bien de uso</div>
+      <div class="field" style="margin-bottom:8px"><label class="field-lbl">¿Qué bien es?</label><input id="g_bien_desc" placeholder="Ej: hormigonera 130L, camioneta, andamios..."></div>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0"><label class="field-lbl">Marca / modelo</label><input id="g_bien_marca" placeholder="Opcional"></div>
+        <div class="field" style="margin-bottom:0"><label class="field-lbl">Nro. serie / patente</label><input id="g_bien_serie" placeholder="Opcional"></div>
+      </div>
+    </div>`;
   else ex.innerHTML = "";
 }
 
-// ── ADMINISTRADOR: listas maestras (proveedores, clientes, centros de costo) ──
+// ── ADMINISTRADOR: listas maestras (proveedores, clientes, centros de costo, cuentas de egreso) ──
 let adminSección = "proveedores";
 function openCentrosModal() { adminSección = "proveedores"; drawAdmin(); }
 function adminGo(s) { adminSección = s; window._admEditIdx = null; drawAdmin(); }
@@ -613,6 +654,7 @@ function drawAdmin() {
     { id: "proveedores", label: "Proveedores" },
     { id: "clientes", label: "Clientes" },
     { id: "centros", label: "Centros de costo" },
+    { id: "cuentas", label: "Cuentas egreso" },
   ];
   const tabs = secciones.map(s => `<button onclick="adminGo('${s.id}')" style="flex:1;padding:9px;border-radius:6px;font-weight:600;font-size:12px;border:1px solid ${adminSección === s.id ? 'var(--accent)' : 'var(--border)'};background:${adminSección === s.id ? 'var(--accent)' : 'transparent'};color:${adminSección === s.id ? '#fff' : 'var(--muted)'}">${s.label}</button>`).join("");
   let cuerpo;
@@ -623,6 +665,14 @@ function drawAdmin() {
       <div style="display:flex;gap:8px">
         <input id="adm_nuevo" placeholder="Nuevo centro de costo" onkeydown="if(event.key==='Enter')admAddCentro()">
         <button class="btn" style="white-space:nowrap" onclick="admAddCentro()">+ Agregar</button>
+      </div>`;
+  } else if (adminSección === "cuentas") {
+    cuerpo = `
+      <p class="muted" style="font-size:13px;margin-bottom:14px">Cuentas para clasificar los egresos (Honorarios, Cargas Sociales, Gastos Bancarios, etc.). También podés crear una al vuelo desde el formulario de egreso.</p>
+      <div id="adm_list" style="margin-bottom:14px"></div>
+      <div style="display:flex;gap:8px">
+        <input id="adm_nuevo" placeholder="Nueva cuenta de egreso" onkeydown="if(event.key==='Enter')admAddCuenta()">
+        <button class="btn" style="white-space:nowrap" onclick="admAddCuenta()">+ Agregar</button>
       </div>`;
   } else {
     const ent = adminSección === "proveedores" ? "proveedor" : "cliente";
@@ -646,17 +696,21 @@ function drawAdmin() {
 function currentList() {
   if (adminSección === "proveedores") return listaProveedores();
   if (adminSección === "clientes") return listaClientes();
+  if (adminSección === "cuentas") return tiposGasto();
   return centrosCosto();
 }
 function renderAdmList() {
   const cont = document.getElementById("adm_list"); if (!cont) return;
   const lista = currentList();
   if (lista.length === 0) { cont.innerHTML = `<div class="muted" style="font-size:12px;text-align:center;padding:16px">Todavía no cargaste nada.</div>`; return; }
-  if (adminSección === "centros") {
+  if (adminSección === "centros" || adminSección === "cuentas") {
+    const esCuentas = adminSección === "cuentas";
+    const fijas = esCuentas ? ["Proveedores", "Retiros", "Bienes de Uso"] : ["General"];
+    const delFn = esCuentas ? "admDelCuenta" : "admDelCentro";
     cont.innerHTML = `<div style="max-height:240px;overflow:auto">` + lista.map((c, i) => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px">
         <span>${esc(c)}</span>
-        ${c === "General" ? `<span class="muted" style="font-size:11px">fijo</span>` : `<button class="btn-danger btn btn-sm" onclick="admDelCentro(${i})">×</button>`}
+        ${fijas.includes(c) ? `<span class="muted" style="font-size:11px">fijo</span>` : `<button class="btn-danger btn btn-sm" onclick="${delFn}(${i})">×</button>`}
       </div>`).join("") + `</div>`;
   } else {
     cont.innerHTML = `<div style="max-height:240px;overflow:auto">` + lista.map((c, i) => {
@@ -682,6 +736,20 @@ function admDelCentro(i) {
   const enUso = d.ingresos.some(x => x.proyecto === nombre) || d.gastos.some(x => x.proyecto === nombre);
   if (enUso && !confirm(`"${nombre}" tiene movimientos. ¿Eliminar de la lista igual?`)) return;
   d.centrosCosto.splice(i, 1); DB.save(); renderAdmList();
+}
+function admAddCuenta() {
+  const inp = document.getElementById("adm_nuevo");
+  const v = inp.value.trim(); if (!v) return;
+  const d = DB.get(); if (!d.tiposGasto || !d.tiposGasto.length) d.tiposGasto = [...TIPOS_GASTO_BASE];
+  if (d.tiposGasto.includes(v)) { alert("Ya existe."); return; }
+  d.tiposGasto.push(v); DB.save(); inp.value = ""; renderAdmList();
+}
+function admDelCuenta(i) {
+  const d = DB.get(); const nombre = d.tiposGasto[i];
+  if (["Proveedores", "Retiros", "Bienes de Uso"].includes(nombre)) return;
+  const enUso = d.gastos.some(x => x.tipo === nombre);
+  if (enUso && !confirm(`"${nombre}" tiene egresos cargados. ¿Eliminar de la lista igual? (los egresos ya cargados no se pierden)`)) return;
+  d.tiposGasto.splice(i, 1); DB.save(); renderAdmList();
 }
 function admAddEntidad() {
   const razon = document.getElementById("ent_razon").value.trim();
@@ -895,6 +963,7 @@ function formaPagoLabel(id) { return (FORMAS_PAGO.find(f => f.id === id) || {}).
 function saveGasto() {
   const impTotal = parseFloat(document.getElementById("g_imp").value || 0);
   const tipo = document.getElementById("g_tipo").value;
+  if (tipo === "__nueva__") { alert("Elegí una cuenta para el egreso."); return; }
   const provEl = document.getElementById("g_prov");
   let proveedor = (provEl && provEl.value !== "__nuevo__") ? provEl.value.trim() : "";
   if (pagosTemp.length === 0) { alert("Agregá al menos una forma de pago."); return; }
@@ -907,7 +976,7 @@ function saveGasto() {
   const facNroEl = document.getElementById("g_facnro");
   const g = {
     fecha: document.getElementById("g_fecha").value, tipo,
-    proveedor: proveedor || (tipo !== "Proveedores" ? tipo : ""),
+    proveedor: proveedor || (tipo !== "Proveedores" && tipo !== "Bienes de Uso" ? tipo : ""),
     facturaTipo: facTipoEl ? facTipoEl.value : "",
     facturaNro: facNroEl ? facNroEl.value.trim() : "",
     concepto: document.getElementById("g_conc").value.trim(),
@@ -919,6 +988,16 @@ function saveGasto() {
   };
   const socEl = document.getElementById("g_socio");
   if (tipo === "Retiros" && socEl) g.socio = socEl.value;
+  // ficha del bien de uso
+  if (tipo === "Bienes de Uso") {
+    const descEl = document.getElementById("g_bien_desc");
+    const desc = descEl ? descEl.value.trim() : "";
+    if (!desc) { alert("Indicá qué bien de uso estás cargando (ej: hormigonera, camioneta, andamios)."); return; }
+    const gv = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    g.bien = { descripcion: desc, marca: gv("g_bien_marca"), serie: gv("g_bien_serie") };
+  } else {
+    g.bien = undefined;
+  }
   if (window._editGastoId) {
     // borrar cheques viejos de este gasto y actualizar
     const dd = DB.get();
@@ -1021,7 +1100,7 @@ function renderChequesTemp(pref) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// VISTA: CAJA (conciliada)
+// VISTA: CAJA (conciliada, con saldo arrastrado fila por fila)
 // ════════════════════════════════════════════════════════════════════════
 function viewCaja() {
   const d = DB.get();
@@ -1032,12 +1111,15 @@ function viewCaja() {
   });
   d.gastos.forEach(g => { const ef = montoPorForma(g, "efectivo"); if (ef > 0) filas.push({ fecha: g.fecha, concepto: g.tipo, detalle: g.proveedor || g.concepto, tipo: "egreso", importe: ef }); });
   (d.ajustesCaja || []).forEach(a => filas.push({ fecha: a.fecha, concepto: "Ajuste manual", detalle: a.detalle, tipo: a.importe >= 0 ? "ingreso" : "egreso", importe: Math.abs(a.importe), ajusteId: a.id }));
-  filas.sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  // del movimiento más viejo al más nuevo, arrastrando el saldo fila por fila
+  filas.sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  let acum = d.saldoInicialCaja || 0;
+  filas.forEach(f => { acum += (f.tipo === "ingreso" ? f.importe : -f.importe); f.saldo = acum; });
   const saldo = saldoCaja();
   const ing = filas.filter(f => f.tipo === "ingreso").reduce((a, f) => a + f.importe, 0);
   const egr = filas.filter(f => f.tipo === "egreso").reduce((a, f) => a + f.importe, 0);
   return `
-    <div class="toolbar"><div><h2>Caja en efectivo</h2><div class="sub">Saldo conciliado: ingresos a caja − pagos en efectivo. Sumá un ajuste si el arqueo no cuadra.</div></div>
+    <div class="toolbar"><div><h2>Caja en efectivo</h2><div class="sub">Del movimiento más viejo al más nuevo — la columna Saldo arrastra el acumulado fila por fila.</div></div>
       <div style="display:flex;gap:8px"><button class="btn-ghost btn" onclick="setSaldoInicialCaja()">Saldo inicial</button><button class="btn-ghost btn" onclick="openAjusteCaja()">+ Ajuste</button></div></div>
     <div class="stats">
       <div class="stat"><div class="lbl">Saldo en caja</div><div class="val" style="color:${saldo >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmt(saldo)}</div><div class="sub">inicial: ${fmt(d.saldoInicialCaja || 0)}</div></div>
@@ -1046,14 +1128,16 @@ function viewCaja() {
     </div>
     <div class="panel" style="overflow:hidden">
       ${filas.length === 0 ? `<div class="empty">Sin movimientos de caja. Se cargan desde Ingresos y Gastos.</div>` :
-      `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Detalle</th><th class="num">Entrada</th><th class="num">Salida</th><th></th></tr></thead><tbody>
+      `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Detalle</th><th class="num">Entrada</th><th class="num">Salida</th><th class="num">Saldo</th><th></th></tr></thead><tbody>
+      <tr><td class="muted">—</td><td style="font-weight:600">Saldo inicial</td><td class="muted">—</td><td class="num muted">—</td><td class="num muted">—</td><td class="num" style="font-weight:700">${fmt(d.saldoInicialCaja || 0)}</td><td></td></tr>
       ${filas.map(f => `<tr>
         <td style="white-space:nowrap">${fmtF(f.fecha)}</td><td>${esc(f.concepto)}</td><td class="muted">${esc(f.detalle) || "—"}</td>
         <td class="num" style="color:var(--success)">${f.tipo === "ingreso" ? "+" + fmt(f.importe) : "—"}</td>
         <td class="num" style="color:var(--danger)">${f.tipo === "egreso" ? "−" + fmt(f.importe) : "—"}</td>
+        <td class="num" style="font-weight:700;color:${f.saldo >= 0 ? 'var(--text)' : 'var(--danger)'}">${fmt(f.saldo)}</td>
         <td>${f.ajusteId ? `<button class="btn-danger btn btn-sm" onclick="DB.remove('ajustesCaja','${f.ajusteId}');render()">×</button>` : `<span class="muted" style="font-size:11px">auto</span>`}</td>
       </tr>`).join("")}
-      </tbody></table></div>`}
+      </tbody><tfoot><tr><td colspan="5" style="font-weight:700;color:var(--accent)">SALDO FINAL</td><td class="num" style="font-weight:700;color:${saldo >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmt(saldo)}</td><td></td></tr></tfoot></table></div>`}
     </div>`;
 }
 function setSaldoInicialCaja() {
@@ -1069,47 +1153,8 @@ function openAjusteCaja() {
 function saveAjuste() { const imp = parseFloat(document.getElementById("aj_imp").value || 0); if (!imp) return; DB.add("ajustesCaja", { fecha: document.getElementById("aj_fecha").value, importe: imp, detalle: document.getElementById("aj_det").value.trim() }); closeModal(); render(); }
 
 // ════════════════════════════════════════════════════════════════════════
-// VISTA: BANCO (saldo manual + proyección por día)
+// VISTA: E-CHEQUES (incluye saldo del banco)
 // ════════════════════════════════════════════════════════════════════════
-function viewBanco() {
-  const d = DB.get();
-  const real = saldoBanco();
-  const pend = chequesPendientesTotal();
-  const proy = saldoBancoProyectado();
-  const proyeccion = proyeccionBanco();
-  const ingBanco = d.ingresos.filter(i => i.destino === "banco");
-  return `
-    <div class="toolbar"><div><h2>Banco Credicoop</h2><div class="sub">El saldo real lo cargás vos. La proyección descuenta los e-cheques por fecha de vencimiento.</div></div>
-      <button class="btn" onclick="setSaldoBanco()">Actualizar saldo real</button></div>
-    <div class="stats">
-      <div class="stat"><div class="lbl">Saldo real banco</div><div class="val">${fmt(real)}</div><div class="sub">${d.saldoBancoFecha ? "al " + fmtF(d.saldoBancoFecha) : "sin cargar"}</div></div>
-      <div class="stat"><div class="lbl">E-cheques pendientes</div><div class="val" style="color:var(--warning)">${fmt(pend)}</div><div class="sub">${chequesPendientes().length} cheques</div></div>
-      <div class="stat"><div class="lbl">Saldo proyectado</div><div class="val" style="color:${proy >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmt(proy)}</div><div class="sub">tras debitar todos</div></div>
-    </div>
-    <div class="panel" style="overflow:hidden;margin-bottom:20px">
-      <div style="padding:13px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:13px">Proyección por fecha de vencimiento</div>
-      ${proyeccion.length === 0 ? `<div class="empty">No hay e-cheques pendientes. Cargá pagos con e-cheque para ver la proyección.</div>` :
-      `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Cheques que vencen</th><th class="num">Se debita</th><th class="num">Saldo antes</th><th class="num">Saldo después</th><th class="num">A cubrir</th></tr></thead><tbody>
-      ${proyeccion.map(p => `<tr style="${p.saldoDespues < 0 ? 'background:#2a1c1c' : ''}">
-        <td style="white-space:nowrap;font-weight:600">${fmtF(p.fecha)}</td>
-        <td class="muted" style="font-size:12px">${p.items.map(c => (c.nro || "s/n") + " · " + fmt(c.importe)).join("<br>")}</td>
-        <td class="num" style="color:var(--danger)">−${fmt(p.totalDia)}</td>
-        <td class="num muted">${fmt(p.saldoAntes)}</td>
-        <td class="num" style="font-weight:700;color:${p.saldoDespues >= 0 ? 'var(--text)' : 'var(--danger)'}">${fmt(p.saldoDespues)}</td>
-        <td class="num" style="font-weight:700;color:${p.cubrir > 0 ? 'var(--danger)' : 'var(--muted)'}">${p.cubrir > 0 ? fmt(p.cubrir) : "—"}</td>
-      </tr>`).join("")}
-      </tbody></table></div>`}
-    </div>
-    <div class="panel" style="overflow:hidden">
-      <div style="padding:13px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:13px">Ingresos registrados al banco <span class="muted" style="font-weight:400">(informativo, no afecta el saldo manual)</span></div>
-      ${ingBanco.length === 0 ? `<div class="empty">Sin ingresos al banco.</div>` :
-      `<div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th class="num">Importe</th></tr></thead><tbody>
-      ${ingBanco.sort((a, b) => (b.fecha || "").localeCompare(a.fecha || "")).map(i => `<tr>
-        <td style="white-space:nowrap">${fmtF(i.fecha)}</td><td class="muted">${esc(i.tipo)}${i.socio ? " · " + esc(i.socio.split(" ")[0]) : ""}</td>
-        <td class="muted">${esc(i.detalle) || "—"}</td><td class="num" style="color:var(--success)">+${fmt(i.importe)}</td></tr>`).join("")}
-      </tbody></table></div>`}
-    </div>`;
-}
 function setSaldoBanco() {
   const d = DB.get();
   modalHTML(`
@@ -1126,10 +1171,6 @@ function saveSaldoBanco() {
   DB.setMeta("saldoBancoFecha", document.getElementById("sb_fecha").value || today());
   closeModal(); render();
 }
-
-// ════════════════════════════════════════════════════════════════════════
-// VISTA: E-CHEQUES
-// ════════════════════════════════════════════════════════════════════════
 function viewCheques() {
   const d = DB.get();
   const emitidos = d.cheques.filter(c => !chequeEsRecibido(c)).sort((a, b) => (a.fechaPago || "").localeCompare(b.fechaPago || ""));
@@ -1197,36 +1238,124 @@ function toggleCheque(id) {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// VISTA: PROVEEDORES
+// VISTA: PROVEEDORES (cuenta por proveedor: total facturado + saldo a pagar)
 // ════════════════════════════════════════════════════════════════════════
 function viewProveedores() {
   const d = DB.get();
-  const pendientes = d.gastos.filter(g => g.estado === "pendiente");
-  // agrupar por proveedor
+  // agrupar por proveedor: entran los egresos de tipo Proveedores / Bienes de Uso
+  // con proveedor cargado, más cualquier otro egreso que tenga saldo pendiente
   const porProv = {};
-  pendientes.forEach(g => { const k = g.proveedor || "Sin nombre"; (porProv[k] = porProv[k] || []).push(g); });
-  const provs = Object.keys(porProv).map(nombre => ({ nombre, items: porProv[nombre], total: porProv[nombre].reduce((a, g) => a + g.importe, 0) })).sort((a, b) => b.total - a.total);
-  const totalDeuda = pendientes.reduce((a, g) => a + g.importe, 0);
+  d.gastos.forEach(g => {
+    const esProveedor = (g.tipo === "Proveedores" || g.tipo === "Bienes de Uso");
+    if (!esProveedor && pendienteDe(g) <= 0) return;
+    const k = g.proveedor || "Sin nombre";
+    (porProv[k] = porProv[k] || []).push(g);
+  });
+  const provs = Object.keys(porProv).map(nombre => {
+    const items = porProv[nombre].sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+    return { nombre, items, total: items.reduce((a, g) => a + g.importe, 0), pendiente: items.reduce((a, g) => a + pendienteDe(g), 0) };
+  }).sort((a, b) => b.pendiente - a.pendiente || b.total - a.total);
+  const totalDeuda = deudaProveedores();
+  const conDeuda = provs.filter(p => p.pendiente > 0).length;
+  const factPend = d.gastos.filter(g => pendienteDe(g) > 0).length;
   return `
-    <div class="toolbar"><div><h2>Proveedores con pago pendiente</h2><div class="sub">Gastos en cuenta corriente — saldalos desde la pestaña Gastos</div></div></div>
+    <div class="toolbar"><div><h2>Proveedores</h2><div class="sub">Cuenta de cada proveedor: total facturado y saldo a pagar en cuenta corriente. Los pendientes se saldan desde acá o desde Egresos.</div></div></div>
     <div class="stats">
-      <div class="stat"><div class="lbl">Deuda total</div><div class="val" style="color:var(--warning)">${fmt(totalDeuda)}</div><div class="sub">${provs.length} proveedores</div></div>
-      <div class="stat"><div class="lbl">Facturas pendientes</div><div class="val">${pendientes.length}</div></div>
+      <div class="stat"><div class="lbl">Deuda total (cta cte)</div><div class="val" style="color:${totalDeuda > 0 ? 'var(--warning)' : 'var(--muted)'}">${fmt(totalDeuda)}</div><div class="sub">${conDeuda} proveedores con deuda</div></div>
+      <div class="stat"><div class="lbl">Facturas pendientes</div><div class="val">${factPend}</div></div>
+      <div class="stat"><div class="lbl">Proveedores con cuenta</div><div class="val">${provs.length}</div></div>
     </div>
-    ${provs.length === 0 ? `<div class="panel"><div class="empty">No hay proveedores pendientes de pago. 🎉</div></div>` :
+    ${provs.length === 0 ? `<div class="panel"><div class="empty">Todavía no hay movimientos de proveedores.</div></div>` :
     provs.map(p => `<div class="panel" style="overflow:hidden;margin-bottom:14px">
-      <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="font-weight:700">${esc(p.nombre)}</span>
-        <span style="font-weight:700;color:var(--warning)">${fmt(p.total)}</span>
+        <span style="display:flex;gap:18px;font-size:13px;align-items:center">
+          <span class="muted">Total facturado: <b style="color:var(--text)">${fmt(p.total)}</b></span>
+          <span class="muted">Saldo a pagar: <b style="color:${p.pendiente > 0 ? 'var(--warning)' : 'var(--success)'}">${p.pendiente > 0 ? fmt(p.pendiente) : fmt(0) + " ✓"}</b></span>
+        </span>
       </div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>C. costo</th><th class="num">Importe</th><th></th></tr></thead><tbody>
-      ${p.items.sort((a, b) => (a.fecha || "").localeCompare(b.fecha || "")).map(g => `<tr>
-        <td style="white-space:nowrap">${fmtF(g.fecha)}</td><td class="muted">${esc(g.concepto) || "—"}</td><td class="muted">${proyectoLabel(g.proyecto)}</td>
+      <div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>C. costo</th><th class="num">Importe</th><th class="num">Pendiente</th><th>Estado</th></tr></thead><tbody>
+      ${p.items.map(g => { const pd = pendienteDe(g); return `<tr>
+        <td style="white-space:nowrap">${fmtF(g.fecha)}</td>
+        <td class="muted">${esc(g.concepto) || (g.bien ? "🚜 " + esc(g.bien.descripcion) : "—")}${(g.facturaTipo || g.facturaNro) ? `<div class="muted" style="font-size:11px">Fc ${esc(g.facturaTipo)} ${esc(g.facturaNro)}</div>` : ""}</td>
+        <td class="muted">${proyectoLabel(g.proyecto)}</td>
         <td class="num" style="font-weight:600">${fmt(g.importe)}</td>
-        <td><button class="btn-success btn btn-sm" onclick="openSaldarModal('${g.id}')">Saldar →</button></td>
-      </tr>`).join("")}
-      </tbody></table></div>
+        <td class="num" style="font-weight:600;color:${pd > 0 ? 'var(--warning)' : 'var(--muted)'}">${pd > 0 ? fmt(pd) : "—"}</td>
+        <td>${pd > 0 ? `<button class="btn-success btn btn-sm" onclick="openSaldarModal('${g.id}')">Saldar →</button>` : `<span class="badge" style="background:var(--success)22;color:var(--success)">Pagado</span>`}</td>
+      </tr>`; }).join("")}
+      </tbody><tfoot><tr><td colspan="3" style="font-weight:700">Totales de ${esc(p.nombre)}</td><td class="num" style="font-weight:700">${fmt(p.total)}</td><td class="num" style="font-weight:700;color:${p.pendiente > 0 ? 'var(--warning)' : 'var(--success)'}">${p.pendiente > 0 ? fmt(p.pendiente) : "—"}</td><td></td></tr></tfoot></table></div>
     </div>`).join("")}`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// VISTA: RESUMEN POR CENTRO DE COSTO
+// ════════════════════════════════════════════════════════════════════════
+function viewCCosto() {
+  const d = DB.get();
+  const acc = {};
+  const de = k => { k = k || "General"; if (!acc[k]) acc[k] = { ing: 0, egr: 0 }; return acc[k]; };
+  d.ingresos.forEach(i => { de(i.proyecto).ing += i.importe; });
+  d.gastos.forEach(g => { de(g.proyecto).egr += g.importe; });
+  centrosCosto().forEach(c => de(c)); // que aparezcan todos aunque no tengan movimientos
+  const rows = Object.keys(acc).map(k => ({ nombre: k, ing: acc[k].ing, egr: acc[k].egr, res: acc[k].ing - acc[k].egr }))
+    .sort((a, b) => (b.ing + b.egr) - (a.ing + a.egr));
+  const tIng = rows.reduce((a, r) => a + r.ing, 0), tEgr = rows.reduce((a, r) => a + r.egr, 0);
+  const res = tIng - tEgr;
+  return `
+    <div class="toolbar"><div><h2>Resumen por centro de costo</h2><div class="sub">Ingresos y egresos imputados a cada obra. Resultado = ingresos − egresos.</div></div></div>
+    <div class="stats">
+      <div class="stat"><div class="lbl">Ingresos totales</div><div class="val" style="color:var(--success)">${fmt(tIng)}</div></div>
+      <div class="stat"><div class="lbl">Egresos totales</div><div class="val" style="color:var(--danger)">${fmt(tEgr)}</div></div>
+      <div class="stat"><div class="lbl">Resultado</div><div class="val" style="color:${res >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmt(res)}</div></div>
+    </div>
+    <div class="panel" style="overflow:hidden">
+      ${rows.length === 0 ? `<div class="empty">Sin movimientos todavía.</div>` :
+      `<div style="overflow-x:auto"><table><thead><tr><th>Centro de costo</th><th class="num">Ingresos</th><th class="num">Egresos</th><th class="num">Resultado</th></tr></thead><tbody>
+      ${rows.map(r => `<tr>
+        <td style="font-weight:600">${esc(r.nombre)}</td>
+        <td class="num" style="color:var(--success)">${r.ing ? "+" + fmt(r.ing) : "—"}</td>
+        <td class="num" style="color:var(--danger)">${r.egr ? "−" + fmt(r.egr) : "—"}</td>
+        <td class="num" style="font-weight:700;color:${r.res >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmt(r.res)}</td>
+      </tr>`).join("")}
+      </tbody><tfoot><tr><td style="font-weight:700;color:var(--accent)">TOTAL</td><td class="num" style="font-weight:700;color:var(--success)">+${fmt(tIng)}</td><td class="num" style="font-weight:700;color:var(--danger)">−${fmt(tEgr)}</td><td class="num" style="font-weight:700;color:${res >= 0 ? 'var(--success)' : 'var(--danger)'}">${fmt(res)}</td></tr></tfoot></table></div>`}
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// VISTA: BIENES DE USO
+// ════════════════════════════════════════════════════════════════════════
+function viewBienes() {
+  const d = DB.get();
+  const bienes = d.gastos.filter(g => g.tipo === "Bienes de Uso").sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  const total = bienes.reduce((a, g) => a + g.importe, 0);
+  return `
+    <div class="toolbar"><div><h2>Bienes de Uso</h2><div class="sub">Maquinaria, vehículos, herramientas y equipos de la empresa. Se cargan como un egreso con cuenta "Bienes de Uso".</div></div>
+      <button class="btn" onclick="openBienNuevo()">+ Cargar bien de uso</button></div>
+    <div class="stats">
+      <div class="stat"><div class="lbl">Valor total de bienes</div><div class="val">${fmt(total)}</div><div class="sub">${bienes.length} ${bienes.length === 1 ? "bien" : "bienes"}</div></div>
+    </div>
+    <div class="panel" style="overflow:hidden">
+      ${bienes.length === 0 ? `<div class="empty">Todavía no cargaste bienes de uso. Registrá un egreso con cuenta "Bienes de Uso" y aparece acá con su ficha.</div>` :
+      `<div style="overflow-x:auto"><table><thead><tr><th>Fecha compra</th><th>Bien</th><th>Marca / modelo</th><th>Nro. serie</th><th>Proveedor</th><th>C. costo</th><th class="num">Valor</th><th>Estado</th><th></th></tr></thead><tbody>
+      ${bienes.map(g => { const b = g.bien || {}; const pd = pendienteDe(g); return `<tr>
+        <td style="white-space:nowrap">${fmtF(g.fecha)}</td>
+        <td style="font-weight:600">${esc(b.descripcion || g.concepto || "—")}</td>
+        <td class="muted">${esc(b.marca) || "—"}</td>
+        <td class="muted" style="font-family:monospace">${esc(b.serie) || "—"}</td>
+        <td class="muted">${esc(g.proveedor) || "—"}</td>
+        <td class="muted">${proyectoLabel(g.proyecto)}</td>
+        <td class="num" style="font-weight:600">${fmt(g.importe)}</td>
+        <td>${pd > 0 ? `<span class="badge" style="background:var(--warning)22;color:var(--warning)">Debe ${fmt(pd)}</span>` : `<span class="badge" style="background:var(--success)22;color:var(--success)">Pagado</span>`}</td>
+        <td><button class="btn-ghost btn btn-sm" onclick="openGastoModal('${g.id}')">✎</button></td>
+      </tr>`; }).join("")}
+      </tbody><tfoot><tr><td colspan="6" style="font-weight:700;color:var(--accent)">TOTAL</td><td class="num" style="font-weight:700">${fmt(total)}</td><td colspan="2"></td></tr></tfoot></table></div>`}
+    </div>`;
+}
+// atajo: abre el formulario de egreso con la cuenta "Bienes de Uso" ya elegida
+function openBienNuevo() {
+  openGastoModal();
+  const s = document.getElementById("g_tipo");
+  if (s) { s.value = "Bienes de Uso"; gTipoChange(); }
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -1437,7 +1566,6 @@ function bootFirebase() {
 }
 if (window.FB) bootFirebase();
 else window.addEventListener("fb-ready", bootFirebase);
-
 
 </script>
 </body>
