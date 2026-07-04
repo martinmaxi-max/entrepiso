@@ -1638,7 +1638,7 @@ function bancParsear(rows) {
       debito:parseFloat(row[4])||0,
       credito:parseFloat(row[5])||0,
       saldo:parseFloat(row[6])||0,
-      cod:(row[7]||'').toString().trim(),
+      cod:(()=>{ const r=(row[7]||'').toString().trim(); const n=parseFloat(r); return (!isNaN(n)&&r===String(n))?r+'.0':r; })(),
     });
   }
   _bancDec = {};
@@ -1830,7 +1830,7 @@ function bancRenderOtros() {
   const filas=_bancOtros.map(m=>{
     const dec=_bancDec[m.id];
     const esD=m.debito>0, monto=esD?m.debito:m.credito;
-    return `<tr style="${dec&&dec.tipo==='ignorar'?'opacity:.35':''}">
+    return `<tr id="bfila_${m.id}" style="${dec&&dec.tipo==='ignorar'?'opacity:.35':''}">
       <td style="white-space:nowrap">${fmtF(m.fecha)}</td>
       <td><div>${esc(m.concepto.substring(0,55))}</div><div class="muted" style="font-size:11px">${esc(m.cod)}</div></td>
       <td class="num" style="color:#e0524f;font-weight:600">${esD?fmt(monto):'—'}</td>
@@ -1903,7 +1903,16 @@ function bancConfirmarDec(id,tipo,montoOrig) {
   closeModal(); renderTabContent();
 }
 
-function bancIgnorar(id) { _bancDec[id]={tipo:'ignorar'}; renderTabContent(); }
+function bancIgnorar(id) {
+  _bancDec[id]={tipo:'ignorar'};
+  const fila = document.getElementById('bfila_'+id);
+  if (fila) {
+    fila.style.opacity='.35';
+    const td = fila.querySelector('td:last-child');
+    if (td) td.innerHTML = `<span class="badge" style="background:#2a1a1a;color:#e0524f">Ignorado</span>
+      <button class="btn-ghost btn btn-sm" style="margin-left:6px" onclick="bancResetDec('${id}')">✕</button>`;
+  }
+}
 function bancResetDec(id) { delete _bancDec[id]; renderTabContent(); }
 
 function bancRenderExtracto() {
