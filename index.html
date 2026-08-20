@@ -613,7 +613,9 @@ function openGastoModal(editId) {
   const e = editId ? DB.get().gastos.find(x => x.id === editId) : null;
   window._editGastoId = editId || null;
   pagosTemp = e && e.pagos ? e.pagos.map(p => ({ ...p })) : [];
+  bienesTemp = e ? bienesDe(e).map(b => ({ ...b })) : [];
   chequesTemp = [];
+  const desdeCC = (window._formaPagoInicial === "cajachica");
   _formaPagoSel = window._formaPagoInicial || "efectivo";
   window._formaPagoInicial = null;
   const tipos = tiposGasto().slice();
@@ -630,19 +632,16 @@ function openGastoModal(editId) {
     </div>
     <div class="field"><label class="field-lbl">Concepto / detalle</label><input id="g_conc" placeholder="Qué se paga" value="${e ? esc(e.concepto || "") : ""}"></div>
     <div class="grid2">
-      <div class="field"><label class="field-lbl">Importe total ($)</label><input id="g_imp" type="number" placeholder="0" value="${e ? e.importe : ""}" oninput="renderPagos()"></div>
+      <div class="field"><label class="field-lbl">Importe total ($)</label><input id="g_imp" type="number" placeholder="0" value="${e ? e.importe : ""}" oninput="renderPagos();renderBienesTemp()"></div>
       <div class="field"><label class="field-lbl">Centro de costo</label><select id="g_proy">${centrosCosto().map(p => `<option ${e && e.proyecto === p ? "selected" : ""}>${p}</option>`).join("")}</select></div>
     </div>
     <div id="g_pagos"></div>
-  `, editId ? "Editar egreso" : "Registrar egreso", "saveGasto()");
+  `, editId ? "Editar egreso" : (desdeCC ? "Registrar egreso — Caja chica" : "Registrar egreso"), "saveGasto()");
   gTipoChange(); renderPagos();
   if (e) {
     if (e.proveedor && document.getElementById("g_prov")) document.getElementById("g_prov").value = e.proveedor;
     if (e.socio && document.getElementById("g_socio")) document.getElementById("g_socio").value = e.socio;
-    if (e.bien) {
-      const m = { g_bien_desc: e.bien.descripcion, g_bien_marca: e.bien.marca, g_bien_serie: e.bien.serie };
-      Object.keys(m).forEach(k => { const el = document.getElementById(k); if (el) el.value = m[k] || ""; });
-    }
+    renderBienesTemp();
   }
 }
 function gTipoChange() {
@@ -664,15 +663,7 @@ function gTipoChange() {
   // mano de obra, etc.), salvo en Retiros donde el destinatario es un socio.
   const campoProv = `<div class="field"><label class="field-lbl">Proveedor / a nombre de <span class="muted" style="text-transform:none;letter-spacing:0">(opcional)</span></label>${selectConNuevo("g_prov", listaProveedores(), "", "proveedores")}</div>`;
   if (t === "Retiros") ex.innerHTML = `<div class="field"><label class="field-lbl">¿Qué socio retira?</label><select id="g_socio">${SOCIOS.map(s => `<option>${s}</option>`).join("")}</select></div>`;
-  else if (t === "Bienes de Uso") ex.innerHTML = campoProv + `
-    <div style="border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--panel2);margin-bottom:13px">
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Datos del bien de uso</div>
-      <div class="field" style="margin-bottom:8px"><label class="field-lbl">¿Qué bien es?</label><input id="g_bien_desc" placeholder="Ej: hormigonera 130L, camioneta, andamios..."></div>
-      <div class="grid2">
-        <div class="field" style="margin-bottom:0"><label class="field-lbl">Marca / modelo</label><input id="g_bien_marca" placeholder="Opcional"></div>
-        <div class="field" style="margin-bottom:0"><label class="field-lbl">Nro. serie / patente</label><input id="g_bien_serie" placeholder="Opcional"></div>
-      </div>
-    </div>`;
+  else if (t === "Bienes de Uso") { ex.innerHTML = campoProv + `<div id="g_bienes"></div>`; renderBienesTemp(); }
   else ex.innerHTML = campoProv;
 }
 
@@ -864,6 +855,56 @@ function guardarNuevaEntidad() {
 }
 
 
+// ── Ítems de bienes de uso: una factura puede traer varios bienes ──
+// bienesTemp: [{descripcion, marca, serie, importe}]
+let bienesTemp = [];
+function renderBienesTemp() {
+  const cont = document.getElementById("g_bienes"); if (!cont) return;
+  const impTotal = parseFloat((document.getElementById("g_imp") || {}).value || 0);
+  const asignado = bienesTemp.reduce((a, b) => a + (b.importe || 0), 0);
+  const resta = impTotal - asignado;
+  cont.innerHTML = `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:14px;background:var(--panel2);margin-bottom:13px">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Bienes de esta factura — podés cargar varios</div>
+      ${bienesTemp.length === 0 ? `<div class="muted" style="font-size:12px;text-align:center;padding:6px 0 12px">Todavía no agregaste ningún bien. Cargá al menos uno.</div>` :
+      `<table style="font-size:12px;margin-bottom:10px"><tbody>
+        ${bienesTemp.map((b, i) => `<tr>
+          <td style="padding:5px 6px;font-weight:600">${esc(b.descripcion)}</td>
+          <td style="padding:5px 6px;color:var(--muted)">${esc([b.marca, b.serie].filter(Boolean).join(" · "))}</td>
+          <td style="padding:5px 6px;text-align:right;font-weight:600">${b.importe ? fmt(b.importe) : "—"}</td>
+          <td style="padding:5px 6px;text-align:right"><button class="btn-danger btn btn-sm" onclick="delBienTemp(${i})">×</button></td>
+        </tr>`).join("")}
+      </tbody></table>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <span>Asignado a bienes: <b>${fmt(asignado)}</b></span>
+        ${impTotal ? `<span style="color:${Math.abs(resta) < 1 ? 'var(--success)' : 'var(--muted)'}">${Math.abs(resta) < 1 ? '✓ coincide con la factura' : 'resto de la factura: ' + fmt(resta)}</span>` : ""}
+      </div>`}
+      <div class="field" style="margin-bottom:8px"><label class="field-lbl">¿Qué bien es?</label><input id="gb_desc" placeholder="Ej: hormigonera 130L, camioneta, andamios..." onkeydown="if(event.key==='Enter'){event.preventDefault();addBienTemp()}"></div>
+      <div class="grid3" style="gap:8px">
+        <div class="field" style="margin:0"><label class="field-lbl">Marca / modelo</label><input id="gb_marca" placeholder="Opcional"></div>
+        <div class="field" style="margin:0"><label class="field-lbl">Nro. serie</label><input id="gb_serie" placeholder="Opcional"></div>
+        <div class="field" style="margin:0"><label class="field-lbl">Valor ($)</label><input id="gb_imp" type="number" placeholder="${resta > 0 ? Math.round(resta) : 0}" onkeydown="if(event.key==='Enter'){event.preventDefault();addBienTemp()}"></div>
+      </div>
+      <button class="btn btn-sm" style="margin-top:10px;width:100%" onclick="addBienTemp()">+ Agregar bien a la factura</button>
+    </div>`;
+}
+function addBienTemp() {
+  const gv = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+  const desc = gv("gb_desc");
+  if (!desc) { alert("Indicá qué bien es."); return; }
+  bienesTemp.push({ descripcion: desc, marca: gv("gb_marca"), serie: gv("gb_serie"), importe: parseFloat(gv("gb_imp") || 0) || 0 });
+  ["gb_desc", "gb_marca", "gb_serie", "gb_imp"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  renderBienesTemp();
+  const f = document.getElementById("gb_desc"); if (f) f.focus();
+}
+function delBienTemp(i) { bienesTemp.splice(i, 1); renderBienesTemp(); }
+// normaliza el modelo viejo (un solo bien) al nuevo (lista de bienes)
+function bienesDe(g) {
+  if (g.bienes && g.bienes.length) return g.bienes;
+  if (g.bien && g.bien.descripcion) return [{ ...g.bien, importe: g.importe }];
+  return [];
+}
+
 // pagosTemp: [{forma, importe, cheques?:[{nro,fechaPago,importe}]}]
 let pagosTemp = [];
 // ── Panel de cobros para ingresos (cobranza mixta de facturas) ──
@@ -1034,12 +1075,14 @@ function saveGasto() {
   if (tipo === "Retiros" && socEl) g.socio = socEl.value;
   // ficha del bien de uso
   if (tipo === "Bienes de Uso") {
-    const descEl = document.getElementById("g_bien_desc");
-    const desc = descEl ? descEl.value.trim() : "";
-    if (!desc) { alert("Indicá qué bien de uso estás cargando (ej: hormigonera, camioneta, andamios)."); return; }
-    const gv = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
-    g.bien = { descripcion: desc, marca: gv("g_bien_marca"), serie: gv("g_bien_serie") };
+    // permitir agregar el bien que quedó tipeado sin haber tocado "+ Agregar"
+    const pend = document.getElementById("gb_desc");
+    if (pend && pend.value.trim()) addBienTemp();
+    if (bienesTemp.length === 0) { alert("Agregá al menos un bien a la factura (ej: hormigonera, camioneta, andamios)."); return; }
+    g.bienes = bienesTemp.map(b => ({ ...b }));
+    g.bien = undefined;   // modelo viejo: queda reemplazado por la lista
   } else {
+    g.bienes = undefined;
     g.bien = undefined;
   }
   if (window._editGastoId) {
@@ -1055,7 +1098,8 @@ function saveGasto() {
     const saved = DB.add("gastos", g);
     generarCheques(saved);
   }
-  pagosTemp = []; chequesTemp = [];
+  pagosTemp = []; chequesTemp = []; bienesTemp = [];
+  window._formaPagoInicial = null;
   closeModal(); render();
 }
 // Saldar la parte pendiente (cta cte) de un gasto
@@ -1216,7 +1260,9 @@ function viewCajaChica() {
   }));
   d.gastos.forEach(g => {
     const cc = montoPorForma(g, "cajachica");
-    if (cc > 0) filas.push({ fecha: g.fecha, concepto: g.tipo, detalle: [g.concepto, g.proveedor].filter(Boolean).join(" · "), tipo: "egreso", importe: cc, gastoId: g.id });
+    if (cc > 0) filas.push({ fecha: g.fecha, concepto: g.tipo,
+      detalle: [g.concepto, g.proveedor, (g.facturaTipo || g.facturaNro) ? "Fc " + (g.facturaTipo || "") + " " + (g.facturaNro || "") : ""].filter(Boolean).join(" · "),
+      tipo: "egreso", importe: cc, gastoId: g.id, parcial: cc < g.importe ? g.importe : 0 });
   });
   (d.ajustesCajaChica || []).forEach(a => filas.push({
     fecha: a.fecha, concepto: "Ajuste manual", detalle: a.detalle,
@@ -1233,10 +1279,10 @@ function viewCajaChica() {
   const desdeBanco = (d.transfCajaChica || []).filter(t => t.origen === "banco").reduce((a, t) => a + t.importe, 0);
   const resp = d.responsableCajaChica || "";
   return `
-    <div class="toolbar"><div><h2>Caja chica</h2><div class="sub">Fondos que se pasan desde la caja general o el banco${resp ? " a " + esc(resp) : ""}. Los gastos se cargan en Egresos eligiendo forma de pago "Caja chica".</div></div>
+    <div class="toolbar"><div><h2>Caja chica</h2><div class="sub">Fondos que se pasan desde la caja general o el banco${resp ? " a " + esc(resp) : ""}. Cargá las facturas acá igual que en Egresos: quedan en las dos pestañas.</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" onclick="openTransfCC()">+ Ingresar fondos</button>
-        <button class="btn-ghost btn" onclick="openGastoCC()">+ Gasto de caja chica</button>
+        <button class="btn" onclick="openGastoCC()">+ Cargar factura / gasto</button>
         <button class="btn-ghost btn" onclick="setSaldoInicialCC()">Saldo inicial</button>
         <button class="btn-ghost btn" onclick="openAjusteCC()">+ Ajuste</button>
       </div></div>
@@ -1253,13 +1299,13 @@ function viewCajaChica() {
       ${filas.map(f => `<tr>
         <td style="white-space:nowrap">${fmtF(f.fecha)}</td>
         <td>${esc(f.concepto)}</td>
-        <td class="muted">${esc(f.detalle) || "—"}</td>
+        <td class="muted">${esc(f.detalle) || "—"}${f.parcial ? `<div class="muted" style="font-size:11px">parte de una factura de ${fmt(f.parcial)}</div>` : ""}</td>
         <td class="num" style="color:var(--success)">${f.tipo === "ingreso" ? "+" + fmt(f.importe) : "—"}</td>
         <td class="num" style="color:var(--danger)">${f.tipo === "egreso" ? "−" + fmt(f.importe) : "—"}</td>
         <td class="num" style="font-weight:600;color:${f.saldo >= 0 ? 'var(--text)' : 'var(--danger)'}">${fmt(f.saldo)}</td>
         <td>${f.transfId ? `<div style="display:flex;gap:6px"><button class="btn-ghost btn btn-sm" onclick="openTransfCC('${f.transfId}')">✎</button><button class="btn-danger btn btn-sm" onclick="delTransfCC('${f.transfId}')">×</button></div>`
             : f.ajusteId ? `<button class="btn-danger btn btn-sm" onclick="DB.remove('ajustesCajaChica','${f.ajusteId}');render()">×</button>`
-            : f.gastoId ? `<button class="btn-ghost btn btn-sm" onclick="openGastoModal('${f.gastoId}')">✎</button>`
+            : f.gastoId ? `<div style="display:flex;gap:6px"><button class="btn-ghost btn btn-sm" onclick="openGastoModal('${f.gastoId}')" title="Editar la factura">✎</button><button class="btn-danger btn btn-sm" onclick="if(confirm('¿Eliminar esta factura? Se borra también de Egresos.')){DB.remove('gastos','${f.gastoId}');render()}">×</button></div>`
             : `<span class="muted" style="font-size:11px">auto</span>`}</td>
       </tr>`).join("")}
       </tbody><tfoot><tr><td colspan="3" style="font-weight:700;color:var(--accent)">TOTALES</td>
@@ -1324,9 +1370,9 @@ function saveAjusteCC() {
   closeModal(); render();
 }
 // atajo: abre el formulario de egreso con la forma de pago "Caja chica" ya elegida
-function openGastoCC() {
+function openGastoCC(editId) {
   window._formaPagoInicial = "cajachica";
-  openGastoModal();
+  openGastoModal(editId);
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -1661,58 +1707,77 @@ function viewCCosto() {
 // ════════════════════════════════════════════════════════════════════════
 function viewBienes() {
   const d = DB.get();
-  const bienes = d.gastos.filter(g => g.tipo === "Bienes de Uso").sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
-  const total = bienes.reduce((a, g) => a + g.importe, 0);
-  const sinFicha = bienes.filter(g => !g.bien || !g.bien.descripcion).length;
+  const facturas = d.gastos.filter(g => g.tipo === "Bienes de Uso").sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  // una fila por BIEN, no por factura: una factura puede traer varios
+  const items = [];
+  facturas.forEach(g => {
+    const lista = bienesDe(g);
+    if (lista.length === 0) { items.push({ g, b: null, idx: -1, varios: false }); return; }
+    lista.forEach((b, idx) => items.push({ g, b, idx, varios: lista.length > 1 }));
+  });
+  const total = facturas.reduce((a, g) => a + g.importe, 0);
+  const sinFicha = items.filter(x => !x.b).length;
+  const valorDe = x => {
+    if (!x.b) return x.g.importe;
+    if (x.b.importe) return x.b.importe;
+    return x.varios ? 0 : x.g.importe;   // si no se detalló, el total es de la factura
+  };
   return `
-    <div class="toolbar"><div><h2>Bienes de Uso</h2><div class="sub">Maquinaria, vehículos, herramientas y equipos. Entra acá todo egreso con cuenta "Bienes de Uso", venga de carga manual o del extracto del banco.</div></div>
+    <div class="toolbar"><div><h2>Bienes de Uso</h2><div class="sub">Maquinaria, vehículos, herramientas y equipos. Una factura puede traer varios bienes: cada uno se lista por separado.</div></div>
       <button class="btn" onclick="openBienNuevo()">+ Cargar bien de uso</button></div>
     <div class="stats">
-      <div class="stat"><div class="lbl">Valor total de bienes</div><div class="val">${fmt(total)}</div><div class="sub">${bienes.length} ${bienes.length === 1 ? "bien" : "bienes"}</div></div>
-      <div class="stat"><div class="lbl">Fichas a completar</div><div class="val" style="color:${sinFicha > 0 ? 'var(--warning)' : 'var(--muted)'}">${sinFicha}</div><div class="sub">${sinFicha > 0 ? "cargados sin datos del bien" : "todas completas"}</div></div>
+      <div class="stat"><div class="lbl">Valor total facturado</div><div class="val">${fmt(total)}</div><div class="sub">${facturas.length} ${facturas.length === 1 ? "factura" : "facturas"}</div></div>
+      <div class="stat"><div class="lbl">Bienes registrados</div><div class="val">${items.filter(x => x.b).length}</div><div class="sub">ítems individuales</div></div>
+      <div class="stat"><div class="lbl">Fichas a completar</div><div class="val" style="color:${sinFicha > 0 ? 'var(--warning)' : 'var(--muted)'}">${sinFicha}</div><div class="sub">${sinFicha > 0 ? "sin datos del bien" : "todas completas"}</div></div>
     </div>
     <div class="panel" style="overflow:hidden">
-      ${bienes.length === 0 ? `<div class="empty">Todavía no cargaste bienes de uso. Registrá un egreso con cuenta "Bienes de Uso" y aparece acá con su ficha.</div>` :
+      ${items.length === 0 ? `<div class="empty">Todavía no cargaste bienes de uso. Registrá un egreso con cuenta "Bienes de Uso" y aparece acá con su ficha.</div>` :
       `<div style="overflow-x:auto"><table><thead><tr><th>Fecha compra</th><th>Bien</th><th>Marca / modelo</th><th>Nro. serie</th><th>Proveedor</th><th>C. costo</th><th class="num">Valor</th><th>Estado</th><th></th></tr></thead><tbody>
-      ${bienes.map(g => { const b = g.bien || {}; const pd = pendienteDe(g); const falta = !b.descripcion; return `<tr>
+      ${items.map(x => { const g = x.g, b = x.b || {}, pd = pendienteDe(g), falta = !x.b; return `<tr>
         <td style="white-space:nowrap">${fmtF(g.fecha)}</td>
-        <td style="font-weight:600">${esc(b.descripcion || g.concepto || "—")}${falta ? `<div><span class="badge" style="background:var(--warning)22;color:var(--warning);margin-top:4px">Ficha incompleta</span></div>` : ""}${g.origen === "banco" ? `<div class="muted" style="font-size:11px">🏦 desde extracto</div>` : ""}</td>
+        <td style="font-weight:600">${esc(b.descripcion || g.concepto || "—")}
+          ${falta ? `<div><span class="badge" style="background:var(--warning)22;color:var(--warning);margin-top:4px">Ficha incompleta</span></div>` : ""}
+          ${x.varios ? `<div class="muted" style="font-size:11px">📄 factura con varios bienes${(g.facturaTipo || g.facturaNro) ? " · Fc " + esc(g.facturaTipo) + " " + esc(g.facturaNro) : ""}</div>` : ""}
+          ${g.origen === "banco" ? `<div class="muted" style="font-size:11px">🏦 desde extracto</div>` : ""}</td>
         <td class="muted">${esc(b.marca) || "—"}</td>
         <td class="muted" style="font-family:monospace">${esc(b.serie) || "—"}</td>
         <td class="muted">${esc(g.proveedor) || "—"}</td>
         <td class="muted">${proyectoLabel(g.proyecto)}</td>
-        <td class="num" style="font-weight:600">${fmt(g.importe)}</td>
+        <td class="num" style="font-weight:600">${valorDe(x) ? fmt(valorDe(x)) : `<span class="muted">s/detalle</span>`}</td>
         <td>${pd > 0 ? `<span class="badge" style="background:var(--warning)22;color:var(--warning)">Debe ${fmt(pd)}</span>` : `<span class="badge" style="background:var(--success)22;color:var(--success)">Pagado</span>`}</td>
-        <td><div style="display:flex;gap:6px">${falta ? `<button class="btn-success btn btn-sm" onclick="openBienFicha('${g.id}')" style="white-space:nowrap">Completar ficha</button>` : `<button class="btn-ghost btn btn-sm" onclick="openBienFicha('${g.id}')">🚜</button>`}<button class="btn-ghost btn btn-sm" onclick="openGastoModal('${g.id}')">✎</button></div></td>
+        <td><div style="display:flex;gap:6px">${falta ? `<button class="btn-success btn btn-sm" onclick="openBienFicha('${g.id}')" style="white-space:nowrap">Completar ficha</button>` : `<button class="btn-ghost btn btn-sm" onclick="openBienFicha('${g.id}')" title="Editar bienes de esta factura">🚜</button>`}<button class="btn-ghost btn btn-sm" onclick="openGastoModal('${g.id}')" title="Editar el egreso">✎</button></div></td>
       </tr>`; }).join("")}
-      </tbody><tfoot><tr><td colspan="6" style="font-weight:700;color:var(--accent)">TOTAL</td><td class="num" style="font-weight:700">${fmt(total)}</td><td colspan="2"></td></tr></tfoot></table></div>`}
+      </tbody><tfoot><tr><td colspan="6" style="font-weight:700;color:var(--accent)">TOTAL FACTURADO</td><td class="num" style="font-weight:700">${fmt(total)}</td><td colspan="2"></td></tr></tfoot></table></div>`}
     </div>`;
 }
 // Completar / editar la ficha del bien sin tocar el resto del egreso.
 // Sirve sobre todo para los bienes que entraron desde el extracto del banco.
 function openBienFicha(id) {
   const g = DB.get().gastos.find(x => x.id === id); if (!g) return;
-  const b = g.bien || {};
+  window._fichaGastoId = id;
+  bienesTemp = bienesDe(g).map(b => ({ ...b }));
   modalHTML(`
-    <p class="muted" style="font-size:13px;margin-bottom:14px">Egreso del ${fmtF(g.fecha)} por <b>${fmt(g.importe)}</b>${g.proveedor ? " — " + esc(g.proveedor) : ""}${g.origen === "banco" ? ` <span class="badge" style="background:var(--info)22;color:var(--info)">desde extracto</span>` : ""}. Completá los datos del bien.</p>
-    <div class="field"><label class="field-lbl">¿Qué bien es?</label><input id="bf_desc" placeholder="Ej: hormigonera 130L, camioneta, andamios..." value="${esc(b.descripcion || g.concepto || "")}"></div>
-    <div class="grid2">
-      <div class="field"><label class="field-lbl">Marca / modelo</label><input id="bf_marca" placeholder="Opcional" value="${esc(b.marca || "")}"></div>
-      <div class="field"><label class="field-lbl">Nro. serie / patente</label><input id="bf_serie" placeholder="Opcional" value="${esc(b.serie || "")}"></div>
-    </div>
+    <p class="muted" style="font-size:13px;margin-bottom:14px">Factura del ${fmtF(g.fecha)} por <b>${fmt(g.importe)}</b>${g.proveedor ? " — " + esc(g.proveedor) : ""}${g.origen === "banco" ? ` <span class="badge" style="background:var(--info)22;color:var(--info)">desde extracto</span>` : ""}. Cargá todos los bienes que trae.</p>
     <div class="field"><label class="field-lbl">Proveedor / a nombre de</label>${selectConNuevo("bf_prov", listaProveedores(), g.proveedor || "", "proveedores")}</div>
-  `, "Ficha del bien de uso", "saveBienFicha('" + id + "')");
+    <div id="g_bienes"></div>
+  `, "Bienes de la factura", "saveBienFicha('" + id + "')");
   const sel = document.getElementById("bf_prov");
   if (sel && g.proveedor) sel.value = g.proveedor;
+  // el panel compara contra el importe de la factura
+  const fake = document.createElement("input"); fake.id = "g_imp"; fake.type = "hidden"; fake.value = g.importe;
+  document.querySelector(".modal-body").appendChild(fake);
+  renderBienesTemp();
 }
 function saveBienFicha(id) {
-  const desc = document.getElementById("bf_desc").value.trim();
-  if (!desc) { alert("Indicá qué bien es."); return; }
+  const pend = document.getElementById("gb_desc");
+  if (pend && pend.value.trim()) addBienTemp();
+  if (bienesTemp.length === 0) { alert("Agregá al menos un bien."); return; }
   const provEl = document.getElementById("bf_prov");
   const prov = (provEl && provEl.value !== "__nuevo__") ? provEl.value.trim() : "";
-  const patch = { bien: { descripcion: desc, marca: document.getElementById("bf_marca").value.trim(), serie: document.getElementById("bf_serie").value.trim() } };
+  const patch = { bienes: bienesTemp.map(b => ({ ...b })), bien: undefined };
   if (prov) patch.proveedor = prov;
   DB.update("gastos", id, patch);
+  bienesTemp = []; window._fichaGastoId = null;
   closeModal(); render();
 }
 // atajo: abre el formulario de egreso con la cuenta "Bienes de Uso" ya elegida
