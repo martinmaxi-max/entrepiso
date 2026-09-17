@@ -169,7 +169,7 @@ const DB = {
   _default() {
     return {
       centrosCosto: ["General"], proveedores: [], clientes: [], tiposGasto: [...TIPOS_GASTO_BASE],
-      ingresos: [], gastos: [], cheques: [], ajustesCaja: [],
+      ingresos: [], gastos: [], cheques: [], ajustesCaja: [], pagosAgrupados: [],
       transfCajaChica: [], ajustesCajaChica: [], saldoInicialCajaChica: 0, responsableCajaChica: "",
       saldoInicialCaja: 0, saldoBancoManual: 0, saldoBancoFecha: "",
     };
@@ -203,6 +203,11 @@ const DB = {
   update(coll, id, patch) { const it = this.get()[coll].find(x => x.id === id); if (it) { Object.assign(it, patch); this.save(); } return it; },
   remove(coll, id) {
     const d = this.get();
+    if (coll === "gastos") {
+      const g = d.gastos.find(x => x.id === id);
+      const pa = g ? pagosAgrupadosDe(g) : [];
+      if (pa.length) { alert("Este egreso está incluido en un pago agrupado. Primero anulá el pago agrupado desde la pestaña Proveedores."); return; }
+    }
     d[coll] = d[coll].filter(x => x.id !== id);
     if (coll === "gastos") d.cheques = d.cheques.filter(c => c.refGasto !== id);
     if (coll === "ingresos") d.cheques = d.cheques.filter(c => c.refIngreso !== id);
@@ -286,6 +291,10 @@ function montoPorForma(g, forma) {
 function pendienteDe(g) {
   if (g.pagos && g.pagos.length) return g.estado === "pendiente" ? (g.montoPendiente || 0) : 0;
   return g.estado === "pendiente" ? g.importe : 0;
+}
+// ids de pagos agrupados en los que participa un egreso
+function pagosAgrupadosDe(g) {
+  return [...new Set((g.pagos || []).filter(p => p.refPagoAgrupado).map(p => p.refPagoAgrupado))];
 }
 // BANCO: saldo 100% manual
 function saldoBanco() { return DB.get().saldoBancoManual || 0; }
@@ -431,7 +440,7 @@ function renderTabContent() {
 // Oculta controles de edición para usuarios lectores
 function aplicarModoLectura() {
   const wrap = document.getElementById("tabwrap"); if (!wrap) return;
-  const escrituras = ["openIngresoModal", "openGastoModal", "openSaldarModal", "openCobrarModal", "DB.remove", "setSaldoInicialCaja", "setSaldoBanco", "openAjusteCaja", "toggleCheque", "openCentrosModal", "openBienNuevo", "openBienFicha", "openTransfCC", "setSaldoInicialCC", "openAjusteCC", "delTransfCC", "openGastoCC"];
+  const escrituras = ["openIngresoModal", "openGastoModal", "openSaldarModal", "openCobrarModal", "DB.remove", "setSaldoInicialCaja", "setSaldoBanco", "openAjusteCaja", "toggleCheque", "openCentrosModal", "openBienNuevo", "openBienFicha", "openTransfCC", "setSaldoInicialCC", "openAjusteCC", "delTransfCC", "openGastoCC", "openPagoAgrupado", "anularPagoAgrupado"];
   wrap.querySelectorAll("button").forEach(btn => {
     const oc = btn.getAttribute("onclick") || "";
     if (escrituras.some(e => oc.includes(e))) btn.style.display = "none";
@@ -991,9 +1000,9 @@ function renderPagos() {
       `<table style="font-size:12px;margin-bottom:10px"><tbody>
         ${pagosTemp.map((p, i) => `<tr>
           <td style="padding:5px 6px">${formaPagoLabel(p.forma)}</td>
-          <td style="padding:5px 6px;color:var(--muted)">${p.forma === "echeque" ? (p.cheques || []).length + " cheque(s)" : ""}</td>
+          <td style="padding:5px 6px;color:var(--muted)">${p.refPagoAgrupado ? "pago agrupado" : p.forma === "echeque" ? (p.cheques || []).length + " cheque(s)" : ""}</td>
           <td style="padding:5px 6px;text-align:right;font-weight:600">${fmt(p.importe)}</td>
-          <td style="padding:5px 6px;text-align:right"><button class="btn-danger btn btn-sm" onclick="delPago(${i})">×</button></td>
+          <td style="padding:5px 6px;text-align:right">${p.refPagoAgrupado ? `<span class="muted" title="Se modifica anulando el pago agrupado" style="font-size:11px">🔒</span>` : `<button class="btn-danger btn btn-sm" onclick="delPago(${i})">×</button>`}</td>
         </tr>`).join("")}
       </tbody></table>`}
       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
@@ -1001,7 +1010,7 @@ function renderPagos() {
         <span style="color:${Math.abs(resta) < 1 ? 'var(--success)' : 'var(--warning)'}">${Math.abs(resta) < 1 ? '✓ completo' : 'falta asignar: ' + fmt(resta)}</span>
       </div>
       <div class="grid2" style="gap:8px;align-items:end">
-        <div class="field" style="margin:0"><label class="field-lbl">Forma</label><select id="pg_forma" onchange="pgFormaChange()">${FORMAS_PAGO.map(f => `<option value="${f.id}" ${f.id === _formaPagoSel ? "selected" : ""}>${f.label}</option>`).join("")}</select></div>
+        <div class="field" style="margin:0"><label class="field-lbl">Forma</label><select id="pg_forma" onchange="pgFormaChange()">${FORMAS_PAGO.filter(f => !(window._modoPagoAgrupado && f.id === "ctacte")).map(f => `<option value="${f.id}" ${f.id === _formaPagoSel ? "selected" : ""}>${f.label}</option>`).join("")}</select></div>
         <div class="field" style="margin:0" id="pg_montowrap"><label class="field-lbl">Monto ($)</label><input id="pg_monto" type="number" placeholder="${resta > 0 ? resta : 0}"></div>
       </div>
       <div id="pg_cheques" style="margin-top:10px"></div>
@@ -1042,7 +1051,7 @@ function addPago() {
   }
   renderPagos();
 }
-function delPago(i) { pagosTemp.splice(i, 1); renderPagos(); }
+function delPago(i) { if (pagosTemp[i] && pagosTemp[i].refPagoAgrupado) return; pagosTemp.splice(i, 1); renderPagos(); }
 function formaPagoLabel(id) { return (FORMAS_PAGO.find(f => f.id === id) || {}).label || id; }
 
 function saveGasto() {
@@ -1052,6 +1061,11 @@ function saveGasto() {
   const provEl = document.getElementById("g_prov");
   let proveedor = (provEl && provEl.value !== "__nuevo__") ? provEl.value.trim() : "";
   if (pagosTemp.length === 0) { alert("Agregá al menos una forma de pago."); return; }
+  if (window._editGastoId) {
+    const orig = DB.get().gastos.find(x => x.id === window._editGastoId);
+    const sumaAgr = arr => (arr || []).filter(p => p.refPagoAgrupado).reduce((a, p) => a + p.importe, 0);
+    if (orig && Math.abs(sumaAgr(orig.pagos) - sumaAgr(pagosTemp)) > 0.5) { alert("Este egreso tiene un pago agrupado. Para cambiar ese pago, anulalo desde Proveedores."); return; }
+  }
   const asignado = pagosTemp.reduce((a, p) => a + p.importe, 0);
   const importe = impTotal || asignado;
   if (Math.abs(importe - asignado) > 1) { alert("El total asignado en las formas de pago (" + fmt(asignado) + ") no coincide con el importe (" + fmt(importe) + ")."); return; }
@@ -1413,7 +1427,7 @@ function viewCheques() {
       ${lista.map(c => `<tr style="${c.estado === "debitado" ? "opacity:.5" : ""}">
         <td><span class="check-pend ${c.estado === "debitado" ? "done" : ""}" onclick="toggleCheque('${c.id}')" title="Marcar como ${esRecibido ? "acreditado" : "pagado"}">${c.estado === "debitado" ? "✓" : ""}</span></td>
         <td style="white-space:nowrap;font-weight:600">${fmtF(c.fechaPago)}</td>
-        <td class="muted" style="font-family:monospace">${esc(c.nro) || "—"}</td><td>${esc(c.beneficiario)}</td>
+        <td class="muted" style="font-family:monospace">${esc(c.nro) || "—"}</td><td>${esc(c.beneficiario)}${c.detalle ? `<div class="muted" style="font-size:11px">${esc(c.detalle)}</div>` : ""}</td>
         <td class="num" style="font-weight:600;color:${esRecibido ? 'var(--success)' : 'var(--danger)'}">${esRecibido ? "+" : "−"}${fmt(c.importe)}</td>
         <td>${c.estado === "pendiente" ? `<span class="badge" style="background:var(--warning)22;color:var(--warning)">Pendiente</span>` : `<span class="badge" style="background:var(--muted)22;color:var(--muted)">${esRecibido ? "Acreditado" : "Pagado"}</span>`}</td>
       </tr>`).join("")}
@@ -1508,6 +1522,8 @@ function viewProveedores() {
     })
     .filter(p => p.items.length > 0)
     .sort((a, b) => b.pendiente - a.pendiente || b.total - a.total);
+  window._provsVisibles = provs;
+  const colSel = puedeEditar() && provs.some(p => pendientesVisibles(p).length > 0);
   const hayFiltro = !!(_fProv.nombre || _fProv.cuenta || _fProv.texto || _fProv.desde || _fProv.hasta || _fProv.estado !== "todos");
   // los totales de arriba acompañan al filtro
   const totalDeuda = hayFiltro ? provs.reduce((a, p) => a + p.pendiente, 0) : deudaProveedores();
@@ -1555,23 +1571,169 @@ function viewProveedores() {
     provs.map(p => `<div class="panel" style="overflow:hidden;margin-bottom:14px">
       <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="font-weight:700">${esc(p.nombre)}</span>
-        <span style="display:flex;gap:18px;font-size:13px;align-items:center">
+        <span style="display:flex;gap:18px;font-size:13px;align-items:center;flex-wrap:wrap">
+          ${barraSeleccion(p)}
           <span class="muted">Total facturado: <b style="color:var(--text)">${fmt(p.total)}</b></span>
           <span class="muted">Saldo a pagar: <b style="color:${p.pendiente > 0 ? 'var(--warning)' : 'var(--success)'}">${p.pendiente > 0 ? fmt(p.pendiente) : fmt(0) + " ✓"}</b></span>
         </span>
       </div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Fecha</th><th>Cuenta</th><th>Concepto</th><th>C. costo</th><th class="num">Importe</th><th class="num">Pendiente</th><th>Estado</th></tr></thead><tbody>
-      ${p.items.map(g => { const pd = pendienteDe(g); return `<tr>
+      <div style="overflow-x:auto"><table><thead><tr>${colSel ? `<th style="width:34px">${checkTodos(p)}</th>` : ""}<th>Fecha</th><th>Cuenta</th><th>Concepto</th><th>C. costo</th><th class="num">Importe</th><th class="num">Pendiente</th><th>Estado</th></tr></thead><tbody>
+      ${p.items.map(g => { const pd = pendienteDe(g); const sel = _selProv.has(g.id); return `<tr style="${sel ? 'background:rgba(224,123,42,.08)' : ''}">
+        ${colSel ? `<td>${pd > 0 ? `<input type="checkbox" class="selprov" style="width:17px;height:17px;cursor:pointer;accent-color:var(--accent)" ${sel ? "checked" : ""} onclick="toggleSelProv('${g.id}')">` : ""}</td>` : ""}
         <td style="white-space:nowrap">${fmtF(g.fecha)}</td>
         <td><span class="badge" style="background:var(--info)22;color:var(--info)">${esc(g.tipo)}</span></td>
         <td class="muted">${esc(g.concepto) || (g.bien ? "🚜 " + esc(g.bien.descripcion) : "—")}${(g.facturaTipo || g.facturaNro) ? `<div class="muted" style="font-size:11px">Fc ${esc(g.facturaTipo)} ${esc(g.facturaNro)}</div>` : ""}</td>
         <td class="muted">${proyectoLabel(g.proyecto)}</td>
         <td class="num" style="font-weight:600">${fmt(g.importe)}</td>
         <td class="num" style="font-weight:600;color:${pd > 0 ? 'var(--warning)' : 'var(--muted)'}">${pd > 0 ? fmt(pd) : "—"}</td>
-        <td>${pd > 0 ? `<button class="btn-success btn btn-sm" onclick="openSaldarModal('${g.id}')">Saldar →</button>` : `<span class="badge" style="background:var(--success)22;color:var(--success)">Pagado</span>`}</td>
+        <td>${pd > 0 ? `<button class="btn-success btn btn-sm" onclick="openSaldarModal('${g.id}')">Saldar →</button>` : `<span class="badge" style="background:var(--success)22;color:var(--success)">Pagado</span>`}${pagosAgrupadosDe(g).length ? `<div class="muted" style="font-size:10px;margin-top:3px">🔗 pago agrupado</div>` : ""}</td>
       </tr>`; }).join("")}
-      </tbody><tfoot><tr><td colspan="4" style="font-weight:700">Totales de ${esc(p.nombre)}</td><td class="num" style="font-weight:700">${fmt(p.total)}</td><td class="num" style="font-weight:700;color:${p.pendiente > 0 ? 'var(--warning)' : 'var(--success)'}">${p.pendiente > 0 ? fmt(p.pendiente) : "—"}</td><td></td></tr></tfoot></table></div>
+      </tbody><tfoot><tr>${colSel ? "<td></td>" : ""}<td colspan="4" style="font-weight:700">Totales de ${esc(p.nombre)}</td><td class="num" style="font-weight:700">${fmt(p.total)}</td><td class="num" style="font-weight:700;color:${p.pendiente > 0 ? 'var(--warning)' : 'var(--success)'}">${p.pendiente > 0 ? fmt(p.pendiente) : "—"}</td><td></td></tr></tfoot></table></div>
+      ${historialAgrupados(p.nombre)}
     </div>`).join("")}`;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// PAGO AGRUPADO: saldar varias facturas de un proveedor con uno o varios pagos
+// (ej: 3 facturas en cta cte pagadas con 3 e-cheques iguales)
+// ════════════════════════════════════════════════════════════════════════
+const _selProv = new Set();
+function toggleSelProv(id) { _selProv.has(id) ? _selProv.delete(id) : _selProv.add(id); renderTabContent(); }
+function pendientesVisibles(p) { return p.items.filter(g => pendienteDe(g) > 0); }
+function checkTodos(p) {
+  const pend = pendientesVisibles(p); if (!pend.length) return "";
+  const todos = pend.every(g => _selProv.has(g.id));
+  return `<input type="checkbox" title="Seleccionar todas las pendientes" style="width:17px;height:17px;cursor:pointer;accent-color:var(--accent)" ${todos ? "checked" : ""} onclick="toggleTodosProv('${esc(p.nombre).replace(/'/g, "\\'")}')">`;
+}
+function toggleTodosProv(nombre) {
+  const ids = gastosPendientesDeProv(nombre).map(g => g.id);
+  const todos = ids.every(id => _selProv.has(id));
+  ids.forEach(id => todos ? _selProv.delete(id) : _selProv.add(id));
+  renderTabContent();
+}
+// pendientes visibles (respetando filtros) de un proveedor
+function gastosPendientesDeProv(nombre) {
+  return (window._provsVisibles || []).filter(p => p.nombre === nombre).flatMap(pendientesVisibles);
+}
+function seleccionDeProv(p) { return pendientesVisibles(p).filter(g => _selProv.has(g.id)); }
+function barraSeleccion(p) {
+  const sel = seleccionDeProv(p);
+  if (!sel.length || !puedeEditar()) return "";
+  const tot = sel.reduce((a, g) => a + pendienteDe(g), 0);
+  return `<button class="btn btn-sm" onclick="openPagoAgrupado('${esc(p.nombre).replace(/'/g, "\\'")}')">💳 Saldar seleccionadas (${sel.length}) — ${fmt(tot)}</button>`;
+}
+function historialAgrupados(nombre) {
+  const lista = (DB.get().pagosAgrupados || []).filter(x => x.proveedor === nombre).sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  if (!lista.length) return "";
+  return `<div style="padding:10px 16px;border-top:1px solid var(--border);background:var(--panel2)">
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Pagos agrupados</div>
+    ${lista.map(pa => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #2b3037;font-size:12px;flex-wrap:wrap">
+      <span>${fmtF(pa.fecha)} · <b>${fmt(pa.total)}</b> · ${pa.facturas.length} factura(s) · ${resumenFormas(pa.pagos)}</span>
+      <span class="muted" style="font-size:11px">${pa.facturas.map(f => esc(f.label)).join(" · ")}</span>
+      <button class="btn-danger btn btn-sm" onclick="anularPagoAgrupado('${pa.id}')">Anular</button>
+    </div>`).join("")}
+  </div>`;
+}
+function resumenFormas(pagos) {
+  return (pagos || []).map(p => p.forma === "echeque" ? `${(p.cheques || []).length} e-cheque(s)` : formaPagoLabel(p.forma)).join(" + ");
+}
+function etiquetaFactura(g) {
+  return (g.facturaTipo || g.facturaNro) ? `Fc ${g.facturaTipo || ""} ${g.facturaNro || ""}`.replace(/\s+/g, " ").trim() : (g.concepto || fmtF(g.fecha));
+}
+function openPagoAgrupado(nombre) {
+  const p = (window._provsVisibles || []).find(x => x.nombre === nombre); if (!p) return;
+  const sel = seleccionDeProv(p).sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  if (!sel.length) return;
+  const total = sel.reduce((a, g) => a + pendienteDe(g), 0);
+  window._pagoAgrCtx = { nombre, ids: sel.map(g => g.id) };
+  window._modoPagoAgrupado = true;
+  pagosTemp = []; chequesTemp = []; _formaPagoSel = "echeque";
+  modalHTML(`
+    <p class="muted" style="font-size:13px;margin-bottom:12px">Pagás <b>${sel.length} factura(s)</b> de <b>${esc(nombre)}</b> juntas. Los cheques se registran una sola vez y el pago se reparte entre las facturas de la más vieja a la más nueva.</p>
+    <div style="border:1px solid var(--border);border-radius:8px;margin-bottom:14px;max-height:180px;overflow:auto">
+      <table style="font-size:12px"><tbody>
+      ${sel.map(g => `<tr><td style="padding:6px 10px">${fmtF(g.fecha)}</td><td style="padding:6px 10px" class="muted">${esc(etiquetaFactura(g))}</td><td style="padding:6px 10px;text-align:right;font-weight:600">${fmt(pendienteDe(g))}</td></tr>`).join("")}
+      </tbody><tfoot><tr><td colspan="2" style="padding:7px 10px;font-weight:700">Total a pagar</td><td style="padding:7px 10px;text-align:right;font-weight:700;color:var(--warning)">${fmt(total)}</td></tr></tfoot></table>
+    </div>
+    <div class="field"><label class="field-lbl">Fecha de pago</label><input id="pa_fecha" type="date" value="${today()}"></div>
+    <input id="g_imp" type="hidden" value="${total}">
+    <div id="g_pagos"></div>
+    <p class="muted" style="font-size:11px;margin-top:8px">Si pagás menos del total, se cancelan primero las facturas más viejas y el saldo queda pendiente en las más nuevas.</p>
+  `, "Pago agrupado — " + esc(nombre), "confirmPagoAgrupado()");
+  renderPagos();
+}
+function confirmPagoAgrupado() {
+  const ctx = window._pagoAgrCtx; if (!ctx) return;
+  const d = DB.get();
+  const facturas = ctx.ids.map(id => d.gastos.find(g => g.id === id)).filter(g => g && pendienteDe(g) > 0)
+    .sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  if (!facturas.length) { alert("Las facturas seleccionadas ya no tienen saldo pendiente."); return; }
+  if (!pagosTemp.length) { alert("Agregá al menos una forma de pago (por ejemplo los e-cheques)."); return; }
+  const total = facturas.reduce((a, g) => a + pendienteDe(g), 0);
+  const pagado = pagosTemp.reduce((a, p) => a + p.importe, 0);
+  if (pagado - total > 0.5) { alert("Estás pagando " + fmt(pagado) + " pero el total pendiente es " + fmt(total) + ". Revisá los montos."); return; }
+  if (total - pagado > 0.5 && !confirm("Pagás " + fmt(pagado) + " de " + fmt(total) + ". La diferencia (" + fmt(total - pagado) + ") queda pendiente. ¿Continuar?")) return;
+  const fecha = document.getElementById("pa_fecha").value || today();
+  const paId = uid();
+  // repartir las líneas de pago entre las facturas (FIFO)
+  const cola = pagosTemp.map(p => ({ forma: p.forma, resto: p.importe }));
+  const asignaciones = [];
+  facturas.forEach(g => {
+    let falta = pendienteDe(g);
+    const lineas = [];
+    for (const c of cola) {
+      if (falta <= 0.5) break;
+      if (c.resto <= 0.5) continue;
+      const m = Math.min(c.resto, falta);
+      c.resto -= m; falta -= m;
+      const prev = lineas.find(l => l.forma === c.forma);
+      if (prev) prev.importe += m; else lineas.push({ forma: c.forma, importe: m, refPagoAgrupado: paId, fechaPago: fecha });
+    }
+    if (lineas.length) asignaciones.push({ g, lineas, restante: falta > 0.5 ? falta : 0 });
+  });
+  asignaciones.forEach(({ g, lineas, restante }) => {
+    // base: pagos actuales sin la cta cte (modelo viejo sin pagos → sin líneas previas)
+    const base = (g.pagos && g.pagos.length) ? g.pagos.filter(p => p.forma !== "ctacte").map(p => ({ ...p })) : [];
+    const pagos = base.concat(lineas);
+    if (restante > 0) pagos.push({ forma: "ctacte", importe: restante });
+    Object.assign(g, { pagos, estado: restante > 0 ? "pendiente" : "pagado", montoPendiente: restante });
+    delete g.forma; delete g.cheques;
+  });
+  const etiquetas = asignaciones.map(a => etiquetaFactura(a.g));
+  // cheques: se registran UNA vez, como cheques reales
+  pagosTemp.filter(p => p.forma === "echeque").forEach(p => (p.cheques || []).forEach(ch => {
+    d.cheques.push({ id: uid(), tipo: "emitido", fechaEmision: fecha, fechaPago: ch.fechaPago, nro: ch.nro, beneficiario: ctx.nombre, importe: ch.importe, refPagoAgrupado: paId, detalle: "Pago agrupado: " + etiquetas.join(" · "), estado: "pendiente" });
+  }));
+  if (!d.pagosAgrupados) d.pagosAgrupados = [];
+  d.pagosAgrupados.push({
+    id: paId, fecha, proveedor: ctx.nombre, total: pagado,
+    pagos: pagosTemp.map(p => ({ ...p })),
+    facturas: asignaciones.map(a => ({ id: a.g.id, label: etiquetaFactura(a.g), importe: a.lineas.reduce((s, l) => s + l.importe, 0) })),
+  });
+  DB.save();
+  ctx.ids.forEach(id => _selProv.delete(id));
+  pagosTemp = []; chequesTemp = []; window._pagoAgrCtx = null; window._modoPagoAgrupado = false;
+  closeModal(); render();
+}
+function anularPagoAgrupado(id) {
+  const d = DB.get();
+  const pa = (d.pagosAgrupados || []).find(x => x.id === id); if (!pa) return;
+  const chq = d.cheques.filter(c => c.refPagoAgrupado === id);
+  const debitados = chq.filter(c => c.estado !== "pendiente").length;
+  let msg = `¿Anular el pago agrupado de ${pa.proveedor} por ${fmt(pa.total)}?\n\nSe borran ${chq.length} cheque(s) y las ${pa.facturas.length} factura(s) vuelven a quedar pendientes.`;
+  if (debitados) msg += `\n\n⚠ ${debitados} cheque(s) ya están marcados como debitados.`;
+  if (!confirm(msg)) return;
+  d.gastos.forEach(g => {
+    if (!g.pagos || !g.pagos.some(p => p.refPagoAgrupado === id)) return;
+    const devuelto = g.pagos.filter(p => p.refPagoAgrupado === id).reduce((a, p) => a + p.importe, 0);
+    const otros = g.pagos.filter(p => p.refPagoAgrupado !== id && p.forma !== "ctacte");
+    const cc = (g.pagos.filter(p => p.forma === "ctacte").reduce((a, p) => a + p.importe, 0)) + devuelto;
+    g.pagos = otros.concat([{ forma: "ctacte", importe: cc }]);
+    g.estado = "pendiente"; g.montoPendiente = cc;
+  });
+  d.cheques = d.cheques.filter(c => c.refPagoAgrupado !== id);
+  d.pagosAgrupados = d.pagosAgrupados.filter(x => x.id !== id);
+  DB.save(); render();
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -1963,7 +2125,7 @@ function modalHTML(body, title, onSave) {
       </div>
     </div></div>`;
 }
-function closeModal() { document.getElementById("modal-root").innerHTML = ""; }
+function closeModal() { document.getElementById("modal-root").innerHTML = ""; window._modoPagoAgrupado = false; }
 // Segundo modal (se superpone al primero, para altas al vuelo)
 function modalHTML2(body, title, onSave) {
   document.getElementById("modal-root2").innerHTML = `
